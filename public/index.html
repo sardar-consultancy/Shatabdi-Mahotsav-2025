@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satabdi Mahotsav WhatsApp Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- JS Barcode Library - UPDATED URL -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- html2canvas for capturing canvas -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+      .gradient-bg {
+        background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+      }
+      .sidebar-gradient {
+        background: linear-gradient(180deg, #1e40af 0%, #1e3a8a 100%);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .notification {
+        animation: slideIn 0.5s ease-out;
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .progress-bar {
+        transition: width 0.3s ease;
+      }
+      .file-upload-indicator {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .group-item {
+        transition: all 0.2s ease;
+      }
+      .group-item:hover {
+        background-color: #f8fafc;
+      }
+      .group-item.selected {
+        background-color: #e0e7ff;
+        border-color: #818cf8;
+      }
+      #barcodeCanvas {
+        display: none;
+      }
+      .image-preview-container {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+      }
+      .barcode-overlay {
+        position: absolute;
+        border: 2px dashed red;
+        background: rgba(255, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- Login Page -->
+    <div
+      id="loginPage"
+      class="min-h-screen gradient-bg flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+          <div
+            class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4"
+          >
+            <i class="fas fa-festival text-blue-600 text-2xl"></i>
+          </div>
+          <h2 class="text-3xl font-bold text-gray-800">
+            Satabdi Mahotsav Admin
+          </h2>
+          <p class="text-gray-600 mt-2">
+            WhatsApp management for Satabdi Mahotsav 2025
+          </p>
+        </div>
+
+        <form id="loginForm">
+          <div class="mb-6">
+            <label
+              for="username"
+              class="block text-gray-700 text-sm font-medium mb-2"
+            >
+              <i class="fas fa-user mr-2 text-blue-500"></i>Username
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              required
+              value="admin"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            />
+          </div>
+
+          <div class="mb-6">
+            <label
+              for="password"
+              class="block text-gray-700 text-sm font-medium mb-2"
+            >
+              <i class="fas fa-lock mr-2 text-blue-500"></i>Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              value="admin@123"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+          >
+            <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+          </button>
+        </form>
+
+        <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <div class="flex items-start">
+            <i class="fas fa-info-circle text-amber-500 mt-1 mr-2"></i>
+            <div>
+              <p class="text-amber-800 font-medium">Default Credentials</p>
+              <p class="text-amber-700 text-sm mt-1">
+                Username: <span class="font-mono">admin</span>
+              </p>
+              <p class="text-amber-700 text-sm">
+                Password: <span class="font-mono">admin@123</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+      <!-- Sidebar -->
+      <div
+        class="sidebar-gradient text-white w-64 fixed inset-y-0 left-0 z-50 shadow-xl"
+      >
+        <div class="flex items-center justify-center h-16 px-4 bg-blue-900">
+          <div class="flex items-center">
+            <i class="fas fa-festival text-2xl text-white mr-2"></i>
+            <span class="text-xl font-bold">SATABDI MAHOTSAV</span>
+          </div>
+        </div>
+
+        <div class="mt-8 px-4">
+          <div
+            class="text-xs uppercase tracking-wider text-blue-300 font-semibold mb-4 px-2"
+          >
+            Main Navigation
+          </div>
+          <nav class="space-y-2">
+            <a
+              href="#"
+              onclick="showTab('dashboard-tab')"
+              class="tab-nav flex items-center px-4 py-3 text-white bg-blue-700 rounded-lg"
+            >
+              <i class="fas fa-tachometer-alt mr-3"></i>
+              <span>Dashboard</span>
+            </a>
+            <a
+              href="#"
+              onclick="showTab('broadcast')"
+              class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
+            >
+              <i class="fas fa-bullhorn mr-3"></i>
+              <span>Broadcast</span>
+            </a>
+            <a
+              href="#"
+              onclick="showTab('configuration')"
+              class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
+            >
+              <i class="fas fa-cog mr-3"></i>
+              <span>Configuration</span>
+            </a>
+            <a
+              href="#"
+              onclick="showTab('templates')"
+              class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
+            >
+              <i class="fas fa-envelope mr-3"></i>
+              <span>Message Templates</span>
+            </a>
+            <a
+              href="#"
+              onclick="showTab('barcode-generator')"
+              class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
+            >
+              <i class="fas fa-barcode mr-3"></i>
+              <span>Barcode Generator</span>
+            </a>
+            <a
+              href="#"
+              onclick="showTab('monitor')"
+              class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
+            >
+              <i class="fas fa-chart-line mr-3"></i>
+              <span>Registration Monitor</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="absolute bottom-0 w-full p-4 border-t border-blue-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium" id="userInfo">Welcome, Admin</p>
+              <p class="text-xs text-blue-300">Super Admin</p>
+            </div>
+            <button
+              onclick="logout()"
+              class="text-blue-200 hover:text-white transition duration-200"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="ml-64">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+          <div class="flex items-center justify-between px-6 py-4">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-800">
+                Satabdi Mahotsav WhatsApp Manager
+              </h1>
+              <p class="text-gray-600">Manage your event communications</p>
+            </div>
+
+            <div class="flex items-center space-x-4">
+              <div
+                id="statusBadge"
+                class="status-badge px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800 flex items-center"
+              >
+                <i class="fas fa-circle mr-2 text-xs"></i>
+                <span>WhatsApp: Disconnected</span>
+              </div>
+
+              <button
+                onclick="logoutWhatsApp()"
+                class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg flex items-center transition duration-200"
+              >
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                <span>Logout WhatsApp</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- QR Code Container -->
+        <div
+          id="qr-container"
+          class="hidden m-6 bg-white rounded-xl shadow-sm p-6 max-w-md"
+        >
+          <div class="text-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Scan QR Code</h3>
+            <p class="text-gray-600 mb-4">
+              Scan this QR code with WhatsApp to connect
+            </p>
+            <img
+              id="qr"
+              src=""
+              alt="QR Code"
+              class="mx-auto border rounded-lg"
+            />
+          </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active p-6">
+          <!-- Stats Grid -->
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+            id="statsGrid"
+          >
+            <!-- Stats will be populated by JavaScript -->
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <h3
+                class="text-xl font-bold text-gray-800 mb-4 flex items-center"
+              >
+                <i class="fas fa-sync-alt text-blue-500 mr-2"></i>
+                Quick Actions
+              </h3>
+              <div class="space-y-4">
+                <button
+                  onclick="syncRegistrations()"
+                  class="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 py-3 px-4 rounded-lg flex items-center justify-center transition duration-200"
+                >
+                  <i class="fas fa-sync mr-2"></i>
+                  Sync Registrations Now
+                </button>
+                <button
+                  onclick="getStats()"
+                  class="w-full bg-green-50 hover:bg-green-100 text-green-700 py-3 px-4 rounded-lg flex items-center justify-center transition duration-200"
+                >
+                  <i class="fas fa-chart-bar mr-2"></i>
+                  Refresh Statistics
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <h3
+                class="text-xl font-bold text-gray-800 mb-4 flex items-center"
+              >
+                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                System Status
+              </h3>
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Registration Sync</span>
+                  <span
+                    class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
+                    >Active</span
+                  >
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Message Sender</span>
+                  <span
+                    class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
+                    >Active</span
+                  >
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">Database Connection</span>
+                  <span
+                    class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
+                    >Connected</span
+                  >
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-gray-600">WhatsApp Connection</span>
+                  <span
+                    id="whatsappStatus"
+                    class="px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full"
+                    >Disconnected</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enhanced Broadcast Tab -->
+        <div id="broadcast" class="tab-content p-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+              <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+                <h3
+                  class="text-xl font-bold text-gray-800 mb-6 flex items-center"
+                >
+                  <i class="fas fa-bullhorn text-purple-500 mr-2"></i>
+                  Send Message
+                </h3>
+
+                <div class="space-y-6">
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2"
+                      >Recipient Type</label
+                    >
+                    <select
+                      id="recipientType"
+                      onchange="toggleRecipientOptions()"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                    >
+                      <option value="groups">Selected Groups</option>
+                      <option value="all_registrations">
+                        All Registered Users
+                      </option>
+                      <option value="custom">Custom Numbers</option>
+                    </select>
+                  </div>
+
+                  <div id="customNumbersContainer" class="hidden">
+                    <label class="block text-gray-700 text-sm font-medium mb-2"
+                      >Custom Numbers</label
+                    >
+                    <input
+                      type="text"
+                      id="customNumbers"
+                      placeholder="9558926180, 9687442735"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                    />
+                    <p class="text-gray-500 text-xs mt-1">
+                      Enter 10-digit numbers separated by commas
+                    </p>
+                  </div>
+
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2"
+                      >Message</label
+                    >
+                    <textarea
+                      id="message"
+                      rows="6"
+                      placeholder="Enter your message here..."
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                    ></textarea>
+                  </div>
+
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2"
+                      >Media File (Optional)</label
+                    >
+                    <div class="flex items-center justify-center w-full">
+                      <label
+                        for="media"
+                        class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition duration-200 relative"
+                      >
+                        <div
+                          class="flex flex-col items-center justify-center pt-5 pb-6"
+                          id="upload-placeholder"
+                        >
+                          <i
+                            class="fas fa-cloud-upload-alt text-gray-400 text-2xl mb-2"
+                          ></i>
+                          <p class="mb-2 text-sm text-gray-500">
+                            <span class="font-semibold">Click to upload</span>
+                            or drag and drop
+                          </p>
+                          <p class="text-xs text-gray-500">
+                            PNG, JPG, GIF, PDF, MP4 (MAX. 10MB)
+                          </p>
+                        </div>
+                        <div
+                          id="file-info"
+                          class="hidden absolute inset-0 flex items-center justify-center bg-green-50 rounded-lg border-2 border-green-300"
+                        >
+                          <div class="text-center">
+                            <i
+                              class="fas fa-file text-green-500 text-2xl mb-2"
+                            ></i>
+                            <p
+                              class="text-sm font-medium text-green-700"
+                              id="file-name"
+                            >
+                              File selected
+                            </p>
+                            <p class="text-xs text-green-600">
+                              Click to change file
+                            </p>
+                          </div>
+                        </div>
+                        <input
+                          id="media"
+                          type="file"
+                          class="hidden"
+                          onchange="handleFileSelect(this)"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <button
+                    onclick="sendMessage()"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                  >
+                    <i class="fas fa-paper-plane mr-2"></i> Send Message
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="bg-white rounded-xl shadow-sm p-6 card-hover mb-6">
+                <h3
+                  class="text-xl font-bold text-gray-800 mb-4 flex items-center"
+                >
+                  <i class="fas fa-users text-blue-500 mr-2"></i>
+                  Available Groups
+                </h3>
+                <div id="groups" class="max-h-80 overflow-y-auto space-y-2">
+                  <!-- Groups will be populated by JavaScript -->
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                  <p class="text-sm font-medium text-gray-700 mb-2">
+                    Selected Groups:
+                  </p>
+                  <div id="selected-groups" class="text-sm text-gray-600"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configuration Tab -->
+        <div id="configuration" class="tab-content p-6">
+          <div class="max-w-4xl">
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <h3
+                class="text-xl font-bold text-gray-800 mb-6 flex items-center"
+              >
+                <i class="fas fa-cog text-blue-500 mr-2"></i>
+                System Configuration
+              </h3>
+
+              <div class="space-y-6">
+                <div>
+                  <label class="block text-gray-700 text-sm font-medium mb-2"
+                    >Admin Numbers</label
+                  >
+                  <input
+                    type="text"
+                    id="adminNumbers"
+                    placeholder="9558926180, 9687442735"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                  />
+                  <p class="text-gray-500 text-xs mt-1">
+                    These numbers will receive new registration notifications
+                  </p>
+                </div>
+
+                <!-- Registration Message Section -->
+                <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+                  <div class="mb-4">
+                    <h4 class="font-medium text-gray-800 text-lg mb-1">
+                      Registration Confirmation Message
+                    </h4>
+                    <p class="text-sm text-gray-600">
+                      This message will be sent to new registrants after
+                      registration. You can edit it here or use the Message
+                      Templates tab for more advanced editing.
+                    </p>
+                  </div>
+                  <div class="mb-4">
+                    <textarea
+                      id="registrationMessage"
+                      rows="8"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 font-mono text-sm"
+                      placeholder="Enter registration confirmation message..."
+                    ></textarea>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-500">
+                      <i class="fas fa-info-circle mr-1"></i>
+                      Use variables like {name}, {village}, {mobile}, etc.
+                    </div>
+                    <button
+                      onclick="showTab('templates')"
+                      class="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                    >
+                      <i class="fas fa-external-link-alt mr-1"></i>
+                      Advanced Template Editor
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex space-x-4">
+                  <button
+                    onclick="saveConfig()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center"
+                  >
+                    <i class="fas fa-save mr-2"></i> Save Configuration
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message Templates Tab -->
+        <div id="templates" class="tab-content p-6">
+          <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-cogs text-blue-500 mr-2"></i>
+              Message Templates
+            </h3>
+            <p class="text-gray-600 mb-4">
+              Edit your message templates here. Changes made here will affect
+              both Configuration tab messages and automatic notifications.
+            </p>
+
+            <div id="templatesList" class="space-y-6">
+              <!-- Templates will be populated by JavaScript -->
+            </div>
+
+            <div class="mt-6">
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 class="font-medium text-blue-800 mb-2 flex items-center">
+                  <i class="fas fa-info-circle mr-2"></i>
+                  Available Variables
+                </h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{name}</code> - Participant name
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{village}</code> - Village
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{state}</code> - State
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{mobile}</code> - Mobile number
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{position}</code> - Position
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{age}</code> - Age
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{gender}</code> - Gender
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{male_members}</code> - Male
+                    members
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{female_members}</code> - Female
+                    members
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{child_members}</code> - Child
+                    members
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{total_members}</code> - Total
+                    members
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{registration_no}</code> -
+                    Registration number
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{connected}</code> - Connected
+                    status
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{total_registrations}</code> -
+                    Total registrations
+                  </div>
+                  <div class="bg-white p-2 rounded border">
+                    <code class="text-blue-600">{today_registrations}</code> -
+                    Today's registrations
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barcode Generator Tab -->
+        <div id="barcode-generator" class="tab-content p-6">
+          <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-barcode text-green-500 mr-2"></i>
+              Barcode Generator
+            </h3>
+            <p class="text-gray-600 mb-6">
+              Generate personalized barcode images for registrations using the
+              predefined template.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <div class="space-y-6">
+                  <!-- REMOVED TEMPLATE UPLOAD SECTION -->
+
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">
+                      <i class="fas fa-user mr-2 text-blue-500"></i>
+                      Select Registration
+                    </label>
+                    <select
+                      id="registrationSelect"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-200"
+                      onchange="onRegistrationSelect()"
+                    >
+                      <option value="">Select a registration...</option>
+                    </select>
+                  </div>
+
+                  <div
+                    id="registrationDetails"
+                    class="hidden space-y-2 p-4 bg-gray-50 rounded-lg"
+                  >
+                    <h4 class="font-medium text-gray-800">
+                      Registration Details
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                      <div class="text-gray-600">Registration No:</div>
+                      <div class="font-medium" id="detail-registration-no">
+                        -
+                      </div>
+                      <div class="text-gray-600">Name:</div>
+                      <div class="font-medium" id="detail-name">-</div>
+                      <div class="text-gray-600">Village:</div>
+                      <div class="font-medium" id="detail-village">-</div>
+                      <div class="text-gray-600">Mobile:</div>
+                      <div class="font-medium" id="detail-mobile">-</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">
+                      <i class="fas fa-sliders-h mr-2 text-blue-500"></i>
+                      Barcode Settings
+                    </label>
+                    <div class="space-y-4 p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <label class="block text-gray-600 text-sm mb-1"
+                          >Barcode Text</label
+                        >
+                        <input
+                          type="text"
+                          id="barcodeData"
+                          placeholder="Registration number will auto-fill"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          readonly
+                        />
+                      </div>
+                      <!-- HIDDEN BARCODE TYPE SELECTOR -->
+                      <div style="display: none">
+                        <label class="block text-gray-600 text-sm mb-1"
+                          >Barcode Type</label
+                        >
+                        <select
+                          id="barcodeType"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        >
+                          <option value="CODE128">CODE128</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label class="block text-gray-600 text-sm mb-1"
+                          >Barcode Color</label
+                        >
+                        <input
+                          type="color"
+                          id="barcodeColor"
+                          value="#000000"
+                          class="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onclick="generateBarcodeImage()"
+                    id="generateBarcodeBtn"
+                    disabled
+                    class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                  >
+                    <i class="fas fa-barcode mr-2"></i> Generate Barcode Image
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div class="sticky top-6">
+                  <div class="mb-4">
+                    <h4 class="font-medium text-gray-800 text-lg mb-2">
+                      Preview
+                    </h4>
+                    <p class="text-sm text-gray-600 mb-4">
+                      Barcode will be placed on the template at the specified
+                      location.
+                    </p>
+                  </div>
+
+                  <div class="image-preview-container mb-4">
+                    <div
+                      id="barcodeOverlay"
+                      class="barcode-overlay hidden"
+                    ></div>
+                    <img
+                      id="templatePreview"
+                      src=""
+                      alt="Template Preview"
+                      class="w-full border rounded-lg"
+                      style="display: none"
+                    />
+                    <div
+                      id="noPreview"
+                      class="flex flex-col items-center justify-center h-64 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50"
+                    >
+                      <i class="fas fa-image text-gray-300 text-4xl mb-3"></i>
+                      <p class="text-gray-500">Loading template preview...</p>
+                    </div>
+                  </div>
+
+                  <div id="generatedImageContainer" class="hidden">
+                    <h5 class="font-medium text-gray-800 mb-2">
+                      Generated Barcode Image
+                    </h5>
+                    <img
+                      id="generatedImage"
+                      src=""
+                      alt="Generated Barcode Image"
+                      class="w-full border rounded-lg mb-4"
+                    />
+                    <div class="flex space-x-4">
+                      <button
+                        onclick="downloadGeneratedImage()"
+                        id="downloadBtn"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                      >
+                        <i class="fas fa-download mr-2"></i> Download
+                      </button>
+                      <button
+                        onclick="sendBarcodeToUser()"
+                        id="sendBarcodeBtn"
+                        class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                      >
+                        <i class="fas fa-paper-plane mr-2"></i> Send to User
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hidden canvas for barcode generation -->
+            <canvas id="barcodeCanvas" width="2700" height="1479"></canvas>
+          </div>
+        </div>
+
+        <!-- Monitor Tab -->
+        <div id="monitor" class="tab-content p-6">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <h3
+                class="text-xl font-bold text-gray-800 mb-4 flex items-center"
+              >
+                <i class="fas fa-chart-line text-green-500 mr-2"></i>
+                Registration Monitor
+              </h3>
+
+              <div class="space-y-4">
+                <div
+                  class="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                >
+                  <span class="text-gray-700">Total Synced Registrations</span>
+                  <span
+                    id="totalSynced"
+                    class="font-mono font-bold text-gray-900"
+                    >0</span
+                  >
+                </div>
+
+                <div
+                  class="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                >
+                  <span class="text-gray-700">User Messages Sent</span>
+                  <span
+                    id="userMessagesSent"
+                    class="font-mono font-bold text-gray-900"
+                    >0</span
+                  >
+                </div>
+
+                <div
+                  class="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                >
+                  <span class="text-gray-700">Admin Notifications Sent</span>
+                  <span
+                    id="adminNotificationsSent"
+                    class="font-mono font-bold text-gray-900"
+                    >0</span
+                  >
+                </div>
+
+                <div
+                  class="flex justify-between items-center p-4 bg-gray-50 rounded-lg"
+                >
+                  <span class="text-gray-600">Pending Messages</span>
+                  <span
+                    id="pendingMessages"
+                    class="font-mono font-bold text-red-600"
+                    >0</span
+                  >
+                </div>
+
+                <div class="flex space-x-4 pt-4">
+                  <button
+                    onclick="syncRegistrations()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                  >
+                    <i class="fas fa-sync-alt mr-2"></i> Sync Now
+                  </button>
+                  <button
+                    onclick="getStats()"
+                    class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+                  >
+                    <i class="fas fa-redo mr-2"></i> Refresh Stats
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+              <h3
+                class="text-xl font-bold text-gray-800 mb-4 flex items-center"
+              >
+                <i class="fas fa-list text-purple-500 mr-2"></i>
+                Latest Registrations
+              </h3>
+              <div
+                id="latestRegistrations"
+                class="space-y-3 max-h-80 overflow-y-auto"
+              >
+                <!-- Latest registrations will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div
+      id="progressModal"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+    >
+      <div
+        class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+      >
+        <div class="mt-3 text-center">
+          <div
+            class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-purple-100"
+          >
+            <i class="fas fa-paper-plane text-purple-600 text-xl"></i>
+          </div>
+          <h3
+            class="text-lg font-medium text-gray-900 mt-2"
+            id="progress-title"
+          >
+            Sending Messages
+          </h3>
+
+          <div class="mt-4 px-4">
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div
+                id="progress-bar"
+                class="bg-purple-600 h-2.5 rounded-full progress-bar"
+                style="width: 0%"
+              ></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-600 mt-1">
+              <span id="progress-text">0%</span>
+              <span id="progress-count">0/0</span>
+            </div>
+            <div class="mt-2 grid grid-cols-2 gap-4 text-sm">
+              <div class="text-green-600">
+                <i class="fas fa-check-circle mr-1"></i>
+                <span id="success-count">0</span> Successful
+              </div>
+              <div class="text-red-600">
+                <i class="fas fa-times-circle mr-1"></i>
+                <span id="failed-count">0</span> Failed
+              </div>
+            </div>
+          </div>
+
+          <div class="items-center px-4 py-3 mt-4">
+            <button
+              id="close-progress"
+              class="px-4 py-2 bg-purple-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      let currentUser = null;
+      let availableTemplates = [];
+      let selectedRegistration = null;
+      let templateImage = null;
+      let generatedImageData = null;
+
+      // Barcode coordinates (for 2700x1479 image)
+      const BARCODE_AREA = {
+        left: 157,
+        top: 1064,
+        width: 1308,
+        height: 275,
+      };
+
+      // Helper function to draw rounded rectangles
+      function roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(
+          x + width,
+          y + height,
+          x + width - radius,
+          y + height
+        );
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      }
+
+      // Check existing session
+      checkSession();
+
+      async function checkSession() {
+        try {
+          const response = await fetch("/session");
+          const data = await response.json();
+
+          if (data.success) {
+            currentUser = data.user;
+            showDashboard();
+          } else {
+            showLogin();
+          }
+        } catch (error) {
+          console.error("Session check failed:", error);
+          showLogin();
+        }
+      }
+
+      function showLogin() {
+        document.getElementById("loginPage").classList.remove("hidden");
+        document.getElementById("dashboard").classList.add("hidden");
+      }
+
+      function showDashboard() {
+        document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("dashboard").classList.remove("hidden");
+        document.getElementById(
+          "userInfo"
+        ).textContent = `Welcome, ${currentUser.username}`;
+        loadConfig();
+        loadTemplates();
+        loadRegistrationsForBarcode();
+        getStats();
+        showTab("dashboard-tab");
+      }
+
+      // Login form handler
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData(e.target);
+          const data = {
+            username: formData.get("username"),
+            password: formData.get("password"),
+          };
+
+          try {
+            const response = await fetch("/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              currentUser = result.user;
+              showDashboard();
+              showNotification("Login successful!", "success");
+            } else {
+              showNotification(result.message, "error");
+            }
+          } catch (error) {
+            showNotification("Login failed: " + error.message, "error");
+          }
+        });
+
+      function logout() {
+        fetch("/logout", { method: "POST" }).then(() => {
+          currentUser = null;
+          showLogin();
+          showNotification("Logged out successfully", "info");
+        });
+      }
+
+      // Socket event handlers
+      socket.on("status", (data) => {
+        const statusBadge = document.getElementById("statusBadge");
+        const whatsappStatus = document.getElementById("whatsappStatus");
+
+        if (data.authenticated) {
+          statusBadge.innerHTML =
+            '<i class="fas fa-circle mr-2 text-xs"></i><span>WhatsApp: Connected</span>';
+          statusBadge.className =
+            "status-badge px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 flex items-center";
+          whatsappStatus.textContent = "Connected";
+          whatsappStatus.className =
+            "px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full";
+        } else {
+          statusBadge.innerHTML =
+            '<i class="fas fa-circle mr-2 text-xs"></i><span>WhatsApp: Disconnected</span>';
+          statusBadge.className =
+            "status-badge px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800 flex items-center";
+          whatsappStatus.textContent = "Disconnected";
+          whatsappStatus.className =
+            "px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full";
+        }
+
+        document
+          .getElementById("qr-container")
+          .classList.toggle("hidden", data.authenticated);
+      });
+
+      socket.on("qr", (qr) => {
+        document.getElementById("qr").src = qr;
+        document.getElementById("qr-container").classList.remove("hidden");
+      });
+
+      socket.on("groups", (groups) => {
+        console.log("Received groups from server:", groups);
+        const groupsDiv = document.getElementById("groups");
+
+        if (groups && groups.length > 0) {
+          groupsDiv.innerHTML = groups
+            .map(
+              (group) =>
+                `<div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
+                        <input type="checkbox" value="${group.id}" onchange="updateSelectedGroups()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <span class="ml-3 text-sm text-gray-700">${group.name}</span>
+                    </div>`
+            )
+            .join("");
+        } else {
+          groupsDiv.innerHTML = `
+            <div class="text-center py-4 text-gray-500">
+                <i class="fas fa-users text-gray-300 text-xl mb-2"></i>
+                <p>No groups found</p>
+                <p class="text-sm">Make sure WhatsApp is connected</p>
+            </div>
+        `;
+        }
+      });
+
+      socket.on("selectedGroups", (selected) => {
+        document.getElementById("selected-groups").textContent =
+          selected.join(", ") || "No groups selected";
+      });
+
+      socket.on("notify", (data) => {
+        showNotification(data.message, data.type);
+      });
+
+      // Enhanced sending progress handler
+      socket.on("sendingProgress", (data) => {
+        if (data.status === "started") {
+          showProgressModal(data.total);
+          showNotification(
+            `Started sending to ${data.total} recipients...`,
+            "info"
+          );
+        } else if (data.status === "progress") {
+          updateProgress(
+            data.processed,
+            data.total,
+            data.successful,
+            data.failed
+          );
+        } else if (data.status === "completed") {
+          updateProgress(data.total, data.total, data.successful, data.failed);
+          setTimeout(() => {
+            hideProgressModal();
+            showNotification(
+              `Message sent to ${data.successful} recipients successfully, ${data.failed} failed`,
+              data.failed === 0 ? "success" : "warning"
+            );
+          }, 1000);
+        } else if (data.status === "error") {
+          hideProgressModal();
+          showNotification(`Error sending message: ${data.error}`, "error");
+        }
+      });
+
+      // File upload handling for media messages
+      function handleFileSelect(input) {
+        const file = input.files[0];
+        const uploadPlaceholder = document.getElementById("upload-placeholder");
+        const fileInfo = document.getElementById("file-info");
+        const fileName = document.getElementById("file-name");
+
+        if (file) {
+          uploadPlaceholder.classList.add("hidden");
+          fileInfo.classList.remove("hidden");
+          fileName.textContent = file.name;
+        } else {
+          uploadPlaceholder.classList.remove("hidden");
+          fileInfo.classList.add("hidden");
+        }
+      }
+
+      // Load template preview automatically
+      async function loadTemplatePreview() {
+        try {
+          const response = await fetch("/api/template-preview");
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+
+            const preview = document.getElementById("templatePreview");
+            const noPreview = document.getElementById("noPreview");
+            const overlay = document.getElementById("barcodeOverlay");
+            const uploadSection = document.getElementById(
+              "template-upload-placeholder"
+            );
+
+            // Hide the upload section since we're using predefined template
+            if (uploadSection) {
+              uploadSection.style.display = "none";
+            }
+
+            templateImage = new Image();
+            templateImage.onload = function () {
+              // Show preview
+              preview.src = url;
+              preview.style.display = "block";
+              if (noPreview) noPreview.style.display = "none";
+
+              // Show barcode overlay area
+              const scale = preview.offsetWidth / templateImage.width;
+              if (overlay) {
+                overlay.style.left = BARCODE_AREA.left * scale + "px";
+                overlay.style.top = BARCODE_AREA.top * scale + "px";
+                overlay.style.width = BARCODE_AREA.width * scale + "px";
+                overlay.style.height = BARCODE_AREA.height * scale + "px";
+                overlay.style.display = "block";
+              }
+
+              // Update button state
+              updateGenerateButtonState();
+            };
+            templateImage.src = url;
+
+            // Hide the template upload container completely
+            const templateUploadContainer = document.querySelector(
+              'label[for="templateImage"]'
+            );
+            if (templateUploadContainer) {
+              templateUploadContainer.style.display = "none";
+            }
+          } else {
+            console.log("Template preview not available");
+          }
+        } catch (error) {
+          console.error("Error loading template preview:", error);
+        }
+      }
+
+      // Load registrations for barcode generator
+      async function loadRegistrationsForBarcode() {
+        try {
+          const response = await fetch("/api/latest-registrations");
+          const data = await response.json();
+
+          if (data.success && data.registrations.length > 0) {
+            const select = document.getElementById("registrationSelect");
+            // Clear existing options except the first one
+            while (select.options.length > 1) {
+              select.remove(1);
+            }
+
+            // Add registrations
+            data.registrations.forEach((reg) => {
+              const option = document.createElement("option");
+              option.value = reg.registration_no;
+              option.textContent = `${reg.registration_no} - ${reg.name} (${reg.village})`;
+              option.dataset.registration = JSON.stringify(reg);
+              select.appendChild(option);
+            });
+          }
+        } catch (error) {
+          console.error("Error loading registrations:", error);
+        }
+      }
+
+      // When registration is selected
+      function onRegistrationSelect() {
+        const select = document.getElementById("registrationSelect");
+        const detailsDiv = document.getElementById("registrationDetails");
+        const barcodeDataInput = document.getElementById("barcodeData");
+
+        if (select.value) {
+          const regData = JSON.parse(
+            select.options[select.selectedIndex].dataset.registration
+          );
+          selectedRegistration = regData;
+
+          // Show details
+          document.getElementById("detail-registration-no").textContent =
+            regData.registration_no;
+          document.getElementById("detail-name").textContent = regData.name;
+          document.getElementById("detail-village").textContent =
+            regData.village;
+          document.getElementById("detail-mobile").textContent = regData.mobile;
+          detailsDiv.classList.remove("hidden");
+
+          // Set barcode data
+          barcodeDataInput.value = regData.registration_no;
+        } else {
+          selectedRegistration = null;
+          detailsDiv.classList.add("hidden");
+          barcodeDataInput.value = "";
+        }
+
+        updateGenerateButtonState();
+      }
+
+      // Update generate button state
+      function updateGenerateButtonState() {
+        const btn = document.getElementById("generateBarcodeBtn");
+        // Enable button if we have a registration selected
+        // Template is automatically loaded from server
+        btn.disabled = !selectedRegistration;
+      }
+
+      // Generate barcode image with WHITE BACKGROUND ONLY BEHIND BARCODE
+      async function generateBarcodeImage() {
+        if (!selectedRegistration) {
+          showNotification("Please select a registration", "error");
+          return;
+        }
+
+        try {
+          showNotification("Generating barcode image...", "info");
+
+          const canvas = document.getElementById("barcodeCanvas");
+          const ctx = canvas.getContext("2d");
+
+          // Clear canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // If we have a template image, draw it
+          if (templateImage) {
+            ctx.drawImage(templateImage, 0, 0, canvas.width, canvas.height);
+          } else {
+            // Create a simple background if no template
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 60px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("Satabdi Mahotsav 2025", canvas.width / 2, 150);
+            ctx.font = "40px Arial";
+            ctx.fillText(
+              `Registration: ${selectedRegistration.registration_no}`,
+              canvas.width / 2,
+              250
+            );
+            ctx.font = "30px Arial";
+            ctx.fillText(
+              `Name: ${selectedRegistration.name}`,
+              canvas.width / 2,
+              320
+            );
+            ctx.fillText(
+              `Village: ${selectedRegistration.village}`,
+              canvas.width / 2,
+              380
+            );
+          }
+
+          // Create temporary canvas for barcode generation
+          const tempCanvas = document.createElement("canvas");
+
+          // Generate barcode with MAXIMUM SIZE settings
+          JsBarcode(tempCanvas, selectedRegistration.registration_no, {
+            format: "CODE128",
+            width: 8, // VERY THICK LINES
+            height: 200, // MAXIMUM HEIGHT
+            displayValue: true,
+            fontOptions: "bold",
+            fontSize: 40, // LARGE FONT
+            textMargin: 12,
+            margin: 2, // Minimal margin
+            lineColor: document.getElementById("barcodeColor").value,
+            background: "transparent",
+            marginTop: 2,
+            marginBottom: 2,
+          });
+
+          // Get actual barcode dimensions
+          const barcodeWidth = tempCanvas.width;
+          const barcodeHeight = tempCanvas.height;
+
+          // Add padding around barcode
+          const PADDING = 20;
+          const whiteBgWidth = barcodeWidth + PADDING * 2;
+          const whiteBgHeight = BARCODE_AREA.height; // Keep original height
+
+          // Calculate PERFECT CENTER position
+          const centerX = (BARCODE_AREA.width - whiteBgWidth) / 2;
+          const centerY = (BARCODE_AREA.height - barcodeHeight) / 2;
+
+          // Create white background canvas
+          const whiteBgCanvas = document.createElement("canvas");
+          whiteBgCanvas.width = BARCODE_AREA.width;
+          whiteBgCanvas.height = BARCODE_AREA.height;
+          const whiteBgCtx = whiteBgCanvas.getContext("2d");
+
+          // Draw WHITE RECTANGLE with ROUNDED CORNERS - ONLY BEHIND BARCODE
+          whiteBgCtx.fillStyle = "#FFFFFF";
+          roundRect(whiteBgCtx, centerX, 0, whiteBgWidth, whiteBgHeight, 20);
+          whiteBgCtx.fill();
+
+          // Draw barcode onto white background - PERFECTLY CENTERED
+          // Create clipping path with rounded corners
+          whiteBgCtx.save();
+          roundRect(
+            whiteBgCtx,
+            centerX + PADDING,
+            centerY,
+            barcodeWidth,
+            barcodeHeight,
+            15
+          );
+          whiteBgCtx.clip();
+          whiteBgCtx.drawImage(tempCanvas, centerX + PADDING, centerY);
+          whiteBgCtx.restore();
+
+          // Add subtle shadow to white rectangle for depth
+          ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+          ctx.shadowBlur = 10;
+          ctx.shadowOffsetX = 4;
+          ctx.shadowOffsetY = 4;
+
+          // Draw white background with barcode onto main canvas
+          ctx.drawImage(
+            whiteBgCanvas,
+            BARCODE_AREA.left,
+            BARCODE_AREA.top,
+            BARCODE_AREA.width,
+            BARCODE_AREA.height
+          );
+
+          // Reset shadow
+          ctx.shadowColor = "transparent";
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+
+          // Convert to data URL
+          generatedImageData = canvas.toDataURL("image/png");
+
+          // Show generated image
+          const generatedImg = document.getElementById("generatedImage");
+          generatedImg.src = generatedImageData;
+          document
+            .getElementById("generatedImageContainer")
+            .classList.remove("hidden");
+
+          showNotification("Barcode image generated successfully!", "success");
+
+          // Debug: Log positioning info
+          console.log("Barcode Positioning Info:");
+          console.log("Printable Area: ", BARCODE_AREA);
+          console.log("Barcode Size: ", {
+            width: barcodeWidth,
+            height: barcodeHeight,
+          });
+          console.log("White BG Size: ", {
+            width: whiteBgWidth,
+            height: whiteBgHeight,
+          });
+          console.log("Center Position: ", { centerX, centerY });
+          console.log("Padding: ", PADDING);
+        } catch (error) {
+          console.error("Error generating barcode:", error);
+          showNotification(
+            "Error generating barcode: " + error.message,
+            "error"
+          );
+        }
+      }
+
+      // Download generated image
+      function downloadGeneratedImage() {
+        if (!generatedImageData) {
+          showNotification("No image to download", "error");
+          return;
+        }
+
+        const link = document.createElement("a");
+        link.href = generatedImageData;
+        link.download = `barcode_${selectedRegistration.registration_no}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showNotification("Image downloaded successfully!", "success");
+      }
+
+      // Send barcode to user via WhatsApp - UPDATED VERSION with duplicate prevention
+      async function sendBarcodeToUser() {
+        if (!generatedImageData || !selectedRegistration) {
+          showNotification("Please generate an image first", "error");
+          return;
+        }
+
+        try {
+          showNotification("Sending barcode to user...", "info");
+
+          // Convert data URL to blob
+          const response = await fetch(generatedImageData);
+          const blob = await response.blob();
+
+          // Send via WhatsApp API
+          const sendResponse = await fetch("/api/send-barcode", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              registrationNo: selectedRegistration.registration_no,
+              mobile: selectedRegistration.mobile,
+            }),
+          });
+
+          const result = await sendResponse.json();
+          if (result.success) {
+            showNotification("Barcode sent to user successfully!", "success");
+
+            // Update button state to prevent duplicate sends
+            const sendBtn = document.getElementById("sendBarcodeBtn");
+            sendBtn.disabled = true;
+            sendBtn.innerHTML =
+              '<i class="fas fa-check mr-2"></i> Already Sent';
+            sendBtn.classList.remove("bg-green-600", "hover:bg-green-700");
+            sendBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+          } else {
+            showNotification(
+              "Failed to send barcode: " + result.message,
+              "error"
+            );
+          }
+        } catch (error) {
+          console.error("Error sending barcode:", error);
+          showNotification("Error sending barcode: " + error.message, "error");
+        }
+      }
+      
+      // Progress modal functions
+      function showProgressModal(total) {
+        const modal = document.getElementById("progressModal");
+        modal.classList.remove("hidden");
+        updateProgress(0, total, 0, 0);
+      }
+
+      function updateProgress(processed, total, successful, failed) {
+        const percentage =
+          total > 0 ? Math.round((processed / total) * 100) : 0;
+
+        document.getElementById("progress-bar").style.width = `${percentage}%`;
+        document.getElementById("progress-text").textContent = `${percentage}%`;
+        document.getElementById(
+          "progress-count"
+        ).textContent = `${processed}/${total}`;
+        document.getElementById("success-count").textContent = successful;
+        document.getElementById("failed-count").textContent = failed;
+      }
+
+      function hideProgressModal() {
+        const modal = document.getElementById("progressModal");
+        modal.classList.add("hidden");
+      }
+
+      // Close progress modal
+      document
+        .getElementById("close-progress")
+        .addEventListener("click", hideProgressModal);
+
+      // Configuration functions
+      async function loadConfig() {
+        try {
+          const response = await fetch("/api/config");
+          const data = await response.json();
+
+          if (data.success) {
+            document.getElementById("adminNumbers").value = data.adminNumbers;
+            document.getElementById("registrationMessage").value =
+              data.registrationMessage || "";
+          }
+        } catch (error) {
+          console.error("Error loading config:", error);
+        }
+      }
+
+      async function saveConfig() {
+        const adminNumbers = document.getElementById("adminNumbers").value;
+        const registrationMessage = document.getElementById(
+          "registrationMessage"
+        ).value;
+
+        try {
+          const response = await fetch("/api/save-config", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              adminNumbers,
+              registrationMessage,
+              groups: Array.from(
+                document.querySelectorAll(
+                  '#groups input[type="checkbox"]:checked'
+                )
+              ).map((cb) => cb.value),
+            }),
+          });
+
+          const result = await response.json();
+          showNotification(
+            result.message,
+            result.success ? "success" : "error"
+          );
+        } catch (error) {
+          showNotification(
+            "Error saving configuration: " + error.message,
+            "error"
+          );
+        }
+      }
+
+      function updateSelectedGroups() {
+        // Groups are saved when configuration is saved
+      }
+
+      // Load templates for editing
+      async function loadTemplates() {
+        try {
+          const response = await fetch("/api/templates");
+          const data = await response.json();
+
+          if (data.success) {
+            availableTemplates = data.templates;
+            displayTemplates();
+          }
+        } catch (error) {
+          console.error("Error loading templates:", error);
+        }
+      }
+
+      // Display templates in editable format
+      function displayTemplates() {
+        const templatesList = document.getElementById("templatesList");
+
+        // Define the order of templates
+        const templateOrder = [
+          "registration_confirmation",
+          "admin_notification",
+        ];
+
+        const templateNames = {
+          registration_confirmation: "Registration Confirmation Template",
+          admin_notification: "Admin Notification Template",
+        };
+
+        const templateDescriptions = {
+          registration_confirmation:
+            "This message is automatically sent to users when they register successfully. It confirms their registration and provides details.",
+          admin_notification:
+            "This message is automatically sent to admin numbers/groups when new registrations are detected. It provides registration details to admins.",
+        };
+
+        // Sort templates according to the defined order
+        const sortedTemplates = [...availableTemplates].sort((a, b) => {
+          return (
+            templateOrder.indexOf(a.template_type) -
+            templateOrder.indexOf(b.template_type)
+          );
+        });
+
+        templatesList.innerHTML = sortedTemplates
+          .map(
+            (template) => `
+      <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+        <div class="mb-4">
+          <h4 class="font-medium text-gray-800 text-lg mb-1">${
+            templateNames[template.template_type] || template.template_type
+          }</h4>
+          <p class="text-sm text-gray-600">${
+            templateDescriptions[template.template_type] || ""
+          }</p>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-medium mb-2">
+            Template Content
+          </label>
+          <textarea 
+            id="template-${template.template_type}" 
+            rows="8"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 font-mono text-sm"
+          >${template.message_text}</textarea>
+        </div>
+        <div class="flex justify-between items-center">
+          <div class="text-sm text-gray-500">
+            <i class="fas fa-calendar mr-1"></i>
+            <span>Last updated: ${new Date(
+              template.updated_at || template.created_at
+            ).toLocaleString()}</span>
+          </div>
+          <button 
+            onclick="saveTemplate('${
+              template.template_type
+            }', document.getElementById('template-${
+              template.template_type
+            }').value)"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center"
+          >
+            <i class="fas fa-save mr-2"></i> Save Template
+          </button>
+        </div>
+      </div>
+    `
+          )
+          .join("");
+      }
+
+      // Save template
+      async function saveTemplate(templateType, messageText) {
+        try {
+          const response = await fetch("/api/update-template", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              templateType,
+              messageText,
+            }),
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            showNotification("Template saved successfully!", "success");
+
+            // Update the template in our local array
+            const templateIndex = availableTemplates.findIndex(
+              (t) => t.template_type === templateType
+            );
+            if (templateIndex !== -1) {
+              availableTemplates[templateIndex].message_text = messageText;
+              availableTemplates[templateIndex].updated_at =
+                new Date().toISOString();
+            }
+
+            // If it's the registration confirmation template, also update the config field
+            if (templateType === "registration_confirmation") {
+              document.getElementById("registrationMessage").value =
+                messageText;
+            }
+          } else {
+            showNotification("Failed to save template", "error");
+          }
+        } catch (error) {
+          showNotification("Error saving template: " + error.message, "error");
+        }
+      }
+
+      // Enhanced message sending with progress
+      async function sendMessage() {
+        const message = document.getElementById("message").value;
+        const recipientType = document.getElementById("recipientType").value;
+        const customNumbers = document.getElementById("customNumbers").value;
+        const media = document.getElementById("media").files[0];
+
+        if (!message && !media) {
+          showNotification("Message text or media is required", "error");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("message", message);
+        formData.append("recipientType", recipientType);
+        formData.append("customNumbers", customNumbers);
+        if (media) formData.append("media", media);
+
+        try {
+          const response = await fetch("/api/send-message", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+          if (!result.success) {
+            showNotification(result.message, "error");
+          }
+        } catch (error) {
+          showNotification("Error sending message: " + error.message, "error");
+        }
+      }
+
+      function toggleRecipientOptions() {
+        const recipientType = document.getElementById("recipientType").value;
+        const customContainer = document.getElementById(
+          "customNumbersContainer"
+        );
+
+        customContainer.classList.add("hidden");
+
+        if (recipientType === "custom") {
+          customContainer.classList.remove("hidden");
+        }
+      }
+
+      // Monitor functions
+      async function syncRegistrations() {
+        try {
+          const response = await fetch("/api/sync-registrations", {
+            method: "POST",
+          });
+          const result = await response.json();
+          showNotification(
+            result.message,
+            result.success ? "success" : "error"
+          );
+          getStats(); // Refresh stats after sync
+          loadRegistrationsForBarcode(); // Refresh barcode dropdown
+        } catch (error) {
+          showNotification(
+            "Error syncing registrations: " + error.message,
+            "error"
+          );
+        }
+      }
+
+      async function getStats() {
+        try {
+          const response = await fetch("/api/stats");
+          const data = await response.json();
+
+          if (data.success) {
+            const stats = data.stats;
+
+            // Update stats grid (3 columns instead of 4)
+            const statsGrid = document.getElementById("statsGrid");
+            statsGrid.innerHTML = `
+          <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center">
+              <div class="p-3 bg-blue-100 rounded-lg mr-4">
+                <i class="fas fa-users text-blue-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Total Registrations</p>
+                <p class="text-2xl font-bold text-gray-800">${stats.total}</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center">
+              <div class="p-3 bg-green-100 rounded-lg mr-4">
+                <i class="fas fa-calendar-day text-green-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Today's Registrations</p>
+                <p class="text-2xl font-bold text-gray-800">${stats.today}</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
+            <div class="flex items-center">
+              <div class="p-3 bg-purple-100 rounded-lg mr-4">
+                <i class="fas fa-chart-pie text-purple-600 text-xl"></i>
+              </div>
+              <div>
+                <p class="text-sm text-gray-600">Pending Messages</p>
+                <p class="text-2xl font-bold text-gray-800">${
+                  stats.syncStats?.pending_messages || 0
+                }</p>
+              </div>
+            </div>
+          </div>
+        `;
+
+            // Update registration monitor section with sync stats
+            if (stats.syncStats) {
+              document.getElementById("totalSynced").textContent =
+                stats.syncStats.total_synced || 0;
+              document.getElementById("userMessagesSent").textContent =
+                stats.syncStats.user_messages_sent || 0;
+              document.getElementById("adminNotificationsSent").textContent =
+                stats.syncStats.admin_notifications_sent || 0;
+              document.getElementById("pendingMessages").textContent =
+                stats.syncStats.pending_messages || 0;
+            }
+
+            // Update latest registrations
+            const latestDiv = document.getElementById("latestRegistrations");
+
+            // Get latest registrations from database
+            try {
+              const regResponse = await fetch("/api/latest-registrations");
+              const regData = await regResponse.json();
+
+              if (regData.success && regData.registrations.length > 0) {
+                latestDiv.innerHTML = regData.registrations
+                  .map(
+                    (reg) => `
+                  <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p class="font-medium text-gray-800">${reg.name}</p>
+                      <p class="text-sm text-gray-600">${reg.village}, ${
+                      reg.state
+                    } - ${reg.mobile}</p>
+                      <p class="text-xs text-gray-500">${reg.position} • ${
+                      reg.total_members
+                    } members</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full ${
+                      reg.gender === "male"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-pink-100 text-pink-800"
+                    }">
+                      ${reg.gender}
+                    </span>
+                  </div>
+                `
+                  )
+                  .join("");
+              } else {
+                latestDiv.innerHTML =
+                  '<p class="text-gray-500 text-center py-4">No recent registrations found</p>';
+              }
+            } catch (regError) {
+              console.error("Error fetching latest registrations:", regError);
+              latestDiv.innerHTML =
+                '<p class="text-gray-500 text-center py-4">Error loading registrations</p>';
+            }
+          }
+        } catch (error) {
+          console.error("Error getting stats:", error);
+          showNotification("Error loading statistics", "error");
+        }
+      }
+
+      function logoutWhatsApp() {
+        fetch("/api/logout-whatsapp", { method: "POST" })
+          .then((response) => response.json())
+          .then((data) => {
+            showNotification(data.message, data.success ? "info" : "error");
+          });
+      }
+
+      // Tab navigation
+      function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+        document.querySelectorAll(".tab-nav").forEach((tab) => {
+          tab.classList.remove("bg-blue-700", "text-white");
+          tab.classList.add("text-blue-100", "hover:bg-blue-700");
+        });
+
+        // Show selected tab
+        document.getElementById(tabName).classList.add("active");
+
+        // Highlight active nav item
+        const activeNav = document.querySelector(
+          `[onclick="showTab('${tabName}')"]`
+        );
+        if (activeNav) {
+          activeNav.classList.remove("text-blue-100", "hover:bg-blue-700");
+          activeNav.classList.add("bg-blue-700", "text-white");
+        }
+
+        if (tabName === "templates") {
+          loadTemplates();
+        } else if (tabName === "barcode-generator") {
+          loadRegistrationsForBarcode();
+          loadTemplatePreview(); // Auto-load template preview
+
+          // Hide barcode type selector since we're using only CODE128
+          const barcodeTypeSelect = document.getElementById("barcodeType");
+          if (barcodeTypeSelect) {
+            barcodeTypeSelect.style.display = "none";
+            // Set to CODE128 and disable
+            barcodeTypeSelect.value = "CODE128";
+            barcodeTypeSelect.disabled = true;
+          }
+
+          // Hide the barcode type label
+          const barcodeTypeLabel = document.querySelector(
+            'label[for="barcodeType"]'
+          );
+          if (barcodeTypeLabel) {
+            barcodeTypeLabel.style.display = "none";
+          }
+        } else if (tabName === "monitor") {
+          getStats(); // Refresh stats when opening monitor tab
+        }
+      }
+
+      // Notification system
+      function showNotification(message, type) {
+        // Remove existing notifications
+        document.querySelectorAll(".notification").forEach((notification) => {
+          notification.remove();
+        });
+
+        const notification = document.createElement("div");
+        let bgColor, icon;
+
+        switch (type) {
+          case "success":
+            bgColor = "bg-green-500";
+            icon = "fa-check-circle";
+            break;
+          case "error":
+            bgColor = "bg-red-500";
+            icon = "fa-exclamation-circle";
+            break;
+          case "warning":
+            bgColor = "bg-amber-500";
+            icon = "fa-exclamation-triangle";
+            break;
+          case "info":
+            bgColor = "bg-blue-500";
+            icon = "fa-info-circle";
+            break;
+          default:
+            bgColor = "bg-gray-500";
+            icon = "fa-info-circle";
+        }
+
+        notification.className = `notification fixed top-4 right-4 ${bgColor} text-white p-4 rounded-lg shadow-lg z-50 max-w-sm flex items-start`;
+        notification.innerHTML = `
+      <i class="fas ${icon} mt-1 mr-3"></i>
+      <div>
+        <p class="font-medium">${message}</p>
+      </div>
+      <button onclick="this.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+        <i class="fas fa-times"></i>
+      </button>
+    `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          if (notification.parentElement) {
+            notification.remove();
+          }
+        }, 5000);
+      }
+
+      // Initialize
+      toggleRecipientOptions();
+    </script>
+  </body>
+</html>
