@@ -167,12 +167,12 @@ async function initializeDatabase() {
       ["admin"]
     );
     if (existingAdmin.length === 0) {
-      const passwordHash = await bcrypt.hash("admin@123", 10);
+      const passwordHash = await bcrypt.hash("H33t@6147", 10);
       await connection.execute(
         "INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)",
         ["admin", passwordHash, "super_admin"]
       );
-      console.log("Default super admin created: admin / admin@123");
+      console.log("Default super admin created");
     }
 
     // Insert 4 default templates (Hindi Version)

@@ -134,7 +134,6 @@
               id="username"
               name="username"
               required
-              value="admin"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             />
           </div>
@@ -151,7 +150,6 @@
               id="password"
               name="password"
               required
-              value="admin@123"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
             />
           </div>
@@ -163,21 +161,6 @@
             <i class="fas fa-sign-in-alt mr-2"></i> Sign In
           </button>
         </form>
-
-        <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <div class="flex items-start">
-            <i class="fas fa-info-circle text-amber-500 mt-1 mr-2"></i>
-            <div>
-              <p class="text-amber-800 font-medium">Default Credentials</p>
-              <p class="text-amber-700 text-sm mt-1">
-                Username: <span class="font-mono">admin</span>
-              </p>
-              <p class="text-amber-700 text-sm">
-                Password: <span class="font-mono">admin@123</span>
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1600,7 +1583,7 @@
           showNotification("Error sending barcode: " + error.message, "error");
         }
       }
-      
+
       // Progress modal functions
       function showProgressModal(total) {
         const modal = document.getElementById("progressModal");
