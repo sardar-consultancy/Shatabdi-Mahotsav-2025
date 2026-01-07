@@ -11,7 +11,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <!-- JS Barcode Library - UPDATED URL -->
+    <!-- JS Barcode Library -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <!-- html2canvas for capturing canvas -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -97,6 +97,27 @@
         position: absolute;
         border: 2px dashed red;
         background: rgba(255, 0, 0, 0.1);
+      }
+      .template-status {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+      }
+      .template-status.approved {
+        background-color: #d1fae5;
+        color: #065f46;
+      }
+      .template-status.pending {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+      .template-status.rejected {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+      .template-status.paused {
+        background-color: #e5e7eb;
+        color: #374151;
       }
     </style>
   </head>
@@ -194,6 +215,14 @@
             </a>
             <a
               href="#"
+              onclick="showTab('whatsapp-business')"
+              class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
+            >
+              <i class="fab fa-whatsapp mr-3"></i>
+              <span>WhatsApp Business</span>
+            </a>
+            <a
+              href="#"
               onclick="showTab('broadcast')"
               class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
             >
@@ -231,6 +260,14 @@
             >
               <i class="fas fa-chart-line mr-3"></i>
               <span>Registration Monitor</span>
+            </a>
+            <a
+              href="#"
+              onclick="showTab('analytics')"
+              class="tab-nav flex items-center px-4 py-3 text-blue-100 hover:bg-blue-700 rounded-lg transition duration-200"
+            >
+              <i class="fas fa-chart-bar mr-3"></i>
+              <span>Analytics</span>
             </a>
           </nav>
         </div>
@@ -271,36 +308,9 @@
                 <i class="fas fa-circle mr-2 text-xs"></i>
                 <span>WhatsApp: Disconnected</span>
               </div>
-
-              <button
-                onclick="logoutWhatsApp()"
-                class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg flex items-center transition duration-200"
-              >
-                <i class="fas fa-sign-out-alt mr-2"></i>
-                <span>Logout WhatsApp</span>
-              </button>
             </div>
           </div>
         </header>
-
-        <!-- QR Code Container -->
-        <div
-          id="qr-container"
-          class="hidden m-6 bg-white rounded-xl shadow-sm p-6 max-w-md"
-        >
-          <div class="text-center">
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Scan QR Code</h3>
-            <p class="text-gray-600 mb-4">
-              Scan this QR code with WhatsApp to connect
-            </p>
-            <img
-              id="qr"
-              src=""
-              alt="QR Code"
-              class="mx-auto border rounded-lg"
-            />
-          </div>
-        </div>
 
         <!-- Dashboard Tab -->
         <div id="dashboard-tab" class="tab-content active p-6">
@@ -335,6 +345,13 @@
                 >
                   <i class="fas fa-chart-bar mr-2"></i>
                   Refresh Statistics
+                </button>
+                <button
+                  onclick="showTab('whatsapp-business')"
+                  class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg flex items-center justify-center transition duration-200"
+                >
+                  <i class="fab fa-whatsapp mr-2"></i>
+                  Connect WhatsApp Business
                 </button>
               </div>
             </div>
@@ -381,6 +398,173 @@
           </div>
         </div>
 
+        <!-- WhatsApp Business Tab -->
+        <div id="whatsapp-business" class="tab-content p-6">
+          <div class="max-w-6xl mx-auto">
+            <!-- Connection Status Card -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fab fa-whatsapp text-green-500 mr-2"></i>
+                WhatsApp Business API Connection
+              </h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Status Info -->
+                <div>
+                  <div class="mb-4">
+                    <div class="flex items-center mb-2">
+                      <span class="text-gray-700 mr-2">Status:</span>
+                      <span id="whatsappConnectionStatus" 
+                            class="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                        Not Connected
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-600">
+                      Connect to WhatsApp Business API to send messages without risk of ban.
+                    </p>
+                  </div>
+
+                  <!-- Connection Form -->
+                  <div id="connectionForm">
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2">
+                          Access Token
+                        </label>
+                        <input type="password" id="accessToken" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                               placeholder="Enter your WhatsApp Business API access token">
+                      </div>
+                      
+                      <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2">
+                          Phone Number ID
+                        </label>
+                        <input type="text" id="phoneNumberId" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                               placeholder="Enter your phone number ID">
+                      </div>
+                      
+                      <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2">
+                          Business Account ID (Optional)
+                        </label>
+                        <input type="text" id="businessAccountId" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                               placeholder="Enter your WhatsApp Business Account ID">
+                      </div>
+                      
+                      <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2">
+                          Webhook Verify Token
+                        </label>
+                        <input type="text" id="webhookVerifyToken" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                               value="satabdi-verify-2025">
+                      </div>
+                      
+                      <button onclick="connectWhatsApp()" 
+                              class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
+                        <i class="fas fa-plug mr-2"></i> Connect WhatsApp Business API
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Connected Info -->
+                  <div id="connectedInfo" class="hidden">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div class="flex items-center mb-2">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span class="font-medium text-green-800">Successfully Connected</span>
+                      </div>
+                      <p class="text-sm text-green-700 mb-3">
+                        WhatsApp Business API is connected and ready to send messages.
+                      </p>
+                      <div class="flex space-x-2">
+                        <button onclick="testWhatsAppConnection()" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 px-4 rounded-lg">
+                          <i class="fas fa-test mr-1"></i> Test Connection
+                        </button>
+                        <button onclick="disconnectWhatsApp()" 
+                                class="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg">
+                          <i class="fas fa-unplug mr-1"></i> Disconnect
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Webhook Info -->
+                <div>
+                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 class="font-medium text-blue-800 mb-2 flex items-center">
+                      <i class="fas fa-link mr-2"></i>
+                      Webhook Configuration
+                    </h4>
+                    <p class="text-sm text-blue-700 mb-3">
+                      Configure this webhook URL in your Meta Developer Portal:
+                    </p>
+                    <div class="bg-white p-3 rounded border border-blue-200 mb-3">
+                      <code id="webhookUrl" class="text-sm text-blue-600 break-all">Loading...</code>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm text-blue-700">
+                        Verify Token: <code class="font-mono">satabdi-verify-2025</code>
+                      </p>
+                      <button onclick="copyWebhookUrl()" class="text-blue-600 hover:text-blue-800 text-sm">
+                        <i class="fas fa-copy mr-1"></i> Copy
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Test Message -->
+                  <div>
+                    <h4 class="font-medium text-gray-800 mb-2">Send Test Message</h4>
+                    <div class="space-y-3">
+                      <input type="text" id="testPhoneNumber" placeholder="9558926180" 
+                             class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <textarea id="testMessage" rows="3" placeholder="Test message..." 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg"></textarea>
+                      <button onclick="sendTestMessage()" 
+                              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-paper-plane mr-2"></i> Send Test Message
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Templates Management -->
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                  <i class="fas fa-layer-group text-purple-500 mr-2"></i>
+                  WhatsApp Templates
+                </h3>
+                <div class="flex space-x-2">
+                  <button onclick="loadWhatsAppTemplates()" 
+                          class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg flex items-center">
+                    <i class="fas fa-sync mr-2"></i> Refresh Templates
+                  </button>
+                  <button onclick="showCreateTemplateModal()" 
+                          class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Create Template
+                  </button>
+                </div>
+              </div>
+              
+              <div id="whatsappTemplatesList" class="space-y-4">
+                <div class="text-center py-8 text-gray-500">
+                  <i class="fas fa-layer-group text-gray-300 text-3xl mb-3"></i>
+                  <p>No templates loaded yet</p>
+                  <p class="text-sm">Click "Refresh Templates" to load templates from WhatsApp</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Enhanced Broadcast Tab -->
         <div id="broadcast" class="tab-content p-6">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -403,7 +587,6 @@
                       onchange="toggleRecipientOptions()"
                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
                     >
-                      <option value="groups">Selected Groups</option>
                       <option value="all_registrations">
                         All Registered Users
                       </option>
@@ -502,21 +685,33 @@
             </div>
 
             <div>
-              <div class="bg-white rounded-xl shadow-sm p-6 card-hover mb-6">
+              <div class="bg-white rounded-xl shadow-sm p-6 card-hover">
                 <h3
                   class="text-xl font-bold text-gray-800 mb-4 flex items-center"
                 >
-                  <i class="fas fa-users text-blue-500 mr-2"></i>
-                  Available Groups
+                  <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                  WhatsApp Business Info
                 </h3>
-                <div id="groups" class="max-h-80 overflow-y-auto space-y-2">
-                  <!-- Groups will be populated by JavaScript -->
-                </div>
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                  <p class="text-sm font-medium text-gray-700 mb-2">
-                    Selected Groups:
-                  </p>
-                  <div id="selected-groups" class="text-sm text-gray-600"></div>
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Connection Status:</span>
+                    <span id="broadcastWhatsappStatus" class="font-medium text-red-600">Disconnected</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Messages Today:</span>
+                    <span id="messagesToday" class="font-medium">0</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-600">Delivery Rate:</span>
+                    <span id="deliveryRate" class="font-medium">0%</span>
+                  </div>
+                  <div class="mt-4 pt-4 border-t border-gray-200">
+                    <p class="text-gray-600 mb-2">Note:</p>
+                    <p class="text-xs text-gray-500">
+                      WhatsApp Business API allows sending messages to individuals only. 
+                      Group messaging is not supported in the official API.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -695,8 +890,6 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <div class="space-y-6">
-                  <!-- REMOVED TEMPLATE UPLOAD SECTION -->
-
                   <div>
                     <label class="block text-gray-700 text-sm font-medium mb-2">
                       <i class="fas fa-user mr-2 text-blue-500"></i>
@@ -945,6 +1138,79 @@
             </div>
           </div>
         </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content p-6">
+          <div class="max-w-6xl mx-auto">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-chart-bar text-orange-500 mr-2"></i>
+                WhatsApp Analytics
+              </h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6" id="analyticsStats">
+                <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                  <div class="text-3xl font-bold text-blue-600" id="totalMessages">0</div>
+                  <div class="text-sm text-gray-600">Total Messages</div>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                  <div class="text-3xl font-bold text-green-600" id="sentMessages">0</div>
+                  <div class="text-sm text-gray-600">Sent</div>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                  <div class="text-3xl font-bold text-purple-600" id="deliveredMessages">0</div>
+                  <div class="text-sm text-gray-600">Delivered</div>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+                  <div class="text-3xl font-bold text-red-600" id="failedMessages">0</div>
+                  <div class="text-sm text-gray-600">Failed</div>
+                </div>
+              </div>
+              
+              <div class="flex space-x-2 mb-6">
+                <button onclick="loadAnalytics('today')" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg">
+                  Today
+                </button>
+                <button onclick="loadAnalytics('week')" 
+                        class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg">
+                  This Week
+                </button>
+                <button onclick="loadAnalytics('month')" 
+                        class="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg">
+                  This Month
+                </button>
+                <button onclick="loadAnalytics()" 
+                        class="bg-orange-600 hover:bg-orange-700 text-white py-2 px-4 rounded-lg flex items-center">
+                  <i class="fas fa-redo mr-2"></i> Refresh
+                </button>
+              </div>
+              
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 class="font-medium text-gray-800 mb-3">Recent Message Activity</h4>
+                <div id="messageActivity" class="space-y-3">
+                  <div class="text-center py-4 text-gray-500">
+                    <i class="fas fa-chart-line text-gray-300 text-2xl mb-2"></i>
+                    <p>No message data available yet</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-sm p-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-history text-gray-500 mr-2"></i>
+                Recent Webhook Events
+              </h3>
+              <div id="webhookEvents" class="space-y-3">
+                <div class="text-center py-4 text-gray-500">
+                  <i class="fas fa-bell text-gray-300 text-2xl mb-2"></i>
+                  <p>No webhook events yet</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1005,6 +1271,75 @@
       </div>
     </div>
 
+    <!-- Create Template Modal -->
+    <div id="createTemplateModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-900">Create WhatsApp Template</h3>
+          <button onclick="closeCreateTemplateModal()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Template Name</label>
+              <input type="text" id="templateName" class="w-full px-3 py-2 border border-gray-300 rounded-lg" 
+                     placeholder="registration_confirmation">
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Category</label>
+              <select id="templateCategory" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                <option value="UTILITY">UTILITY</option>
+                <option value="MARKETING">MARKETING</option>
+                <option value="AUTHENTICATION">AUTHENTICATION</option>
+              </select>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Language</label>
+            <select id="templateLanguage" class="w-full px-3 py-2 border border-gray-300 rounded-lg">
+              <option value="en">English</option>
+              <option value="hi">Hindi</option>
+              <option value="gu">Gujarati</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Template Body</label>
+            <textarea id="templateBody" rows="6" class="w-full px-3 py-2 border border-gray-300 rounded-lg" 
+                      placeholder="Enter template body with {{1}} for variables"></textarea>
+            <p class="text-xs text-gray-500 mt-1">Use {{1}}, {{2}}, {{3}} for variables. Example: Hello {{1}}, your registration {{2}} is confirmed.</p>
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Header (Optional)</label>
+            <input type="text" id="templateHeader" class="w-full px-3 py-2 border border-gray-300 rounded-lg" 
+                   placeholder="Header text or leave empty">
+          </div>
+          
+          <div>
+            <label class="block text-gray-700 text-sm font-medium mb-2">Footer (Optional)</label>
+            <input type="text" id="templateFooter" class="w-full px-3 py-2 border border-gray-300 rounded-lg" 
+                   placeholder="Footer text or leave empty">
+          </div>
+          
+          <div class="flex justify-end space-x-2 pt-4">
+            <button onclick="closeCreateTemplateModal()" 
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+              Cancel
+            </button>
+            <button onclick="createWhatsAppTemplate()" 
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+              Create Template
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
@@ -1013,6 +1348,7 @@
       let selectedRegistration = null;
       let templateImage = null;
       let generatedImageData = null;
+      let whatsappConnected = false;
 
       // Barcode coordinates (for 2700x1479 image)
       const BARCODE_AREA = {
@@ -1077,6 +1413,7 @@
         loadTemplates();
         loadRegistrationsForBarcode();
         getStats();
+        checkWhatsAppStatus();
         showTab("dashboard-tab");
       }
 
@@ -1123,65 +1460,16 @@
 
       // Socket event handlers
       socket.on("status", (data) => {
-        const statusBadge = document.getElementById("statusBadge");
-        const whatsappStatus = document.getElementById("whatsappStatus");
+        updateWhatsAppStatus(data.authenticated);
+      });
 
-        if (data.authenticated) {
-          statusBadge.innerHTML =
-            '<i class="fas fa-circle mr-2 text-xs"></i><span>WhatsApp: Connected</span>';
-          statusBadge.className =
-            "status-badge px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 flex items-center";
-          whatsappStatus.textContent = "Connected";
-          whatsappStatus.className =
-            "px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full";
-        } else {
-          statusBadge.innerHTML =
-            '<i class="fas fa-circle mr-2 text-xs"></i><span>WhatsApp: Disconnected</span>';
-          statusBadge.className =
-            "status-badge px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800 flex items-center";
-          whatsappStatus.textContent = "Disconnected";
-          whatsappStatus.className =
-            "px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full";
-        }
-
-        document
-          .getElementById("qr-container")
-          .classList.toggle("hidden", data.authenticated);
+      socket.on("whatsappStatus", (data) => {
+        updateWhatsAppStatus(data.connected);
       });
 
       socket.on("qr", (qr) => {
-        document.getElementById("qr").src = qr;
-        document.getElementById("qr-container").classList.remove("hidden");
-      });
-
-      socket.on("groups", (groups) => {
-        console.log("Received groups from server:", groups);
-        const groupsDiv = document.getElementById("groups");
-
-        if (groups && groups.length > 0) {
-          groupsDiv.innerHTML = groups
-            .map(
-              (group) =>
-                `<div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200">
-                        <input type="checkbox" value="${group.id}" onchange="updateSelectedGroups()" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <span class="ml-3 text-sm text-gray-700">${group.name}</span>
-                    </div>`
-            )
-            .join("");
-        } else {
-          groupsDiv.innerHTML = `
-            <div class="text-center py-4 text-gray-500">
-                <i class="fas fa-users text-gray-300 text-xl mb-2"></i>
-                <p>No groups found</p>
-                <p class="text-sm">Make sure WhatsApp is connected</p>
-            </div>
-        `;
-        }
-      });
-
-      socket.on("selectedGroups", (selected) => {
-        document.getElementById("selected-groups").textContent =
-          selected.join(", ") || "No groups selected";
+        // QR code no longer needed for WhatsApp Business API
+        console.log("QR code received (ignored for WhatsApp Business API)");
       });
 
       socket.on("notify", (data) => {
@@ -1208,7 +1496,7 @@
           setTimeout(() => {
             hideProgressModal();
             showNotification(
-              `Message sent to ${data.successful} recipients successfully, ${data.failed} failed`,
+              `Message queued for ${data.successful} recipients successfully, ${data.failed} failed`,
               data.failed === 0 ? "success" : "warning"
             );
           }, 1000);
@@ -1217,6 +1505,391 @@
           showNotification(`Error sending message: ${data.error}`, "error");
         }
       });
+
+      // Update WhatsApp status
+      function updateWhatsAppStatus(connected) {
+        whatsappConnected = connected;
+        const statusBadge = document.getElementById("statusBadge");
+        const whatsappStatus = document.getElementById("whatsappStatus");
+        const broadcastStatus = document.getElementById("broadcastWhatsappStatus");
+
+        if (connected) {
+          statusBadge.innerHTML =
+            '<i class="fas fa-circle mr-2 text-xs"></i><span>WhatsApp: Connected</span>';
+          statusBadge.className =
+            "status-badge px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800 flex items-center";
+          whatsappStatus.textContent = "Connected";
+          whatsappStatus.className =
+            "px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full";
+          if (broadcastStatus) {
+            broadcastStatus.textContent = "Connected";
+            broadcastStatus.className = "font-medium text-green-600";
+          }
+        } else {
+          statusBadge.innerHTML =
+            '<i class="fas fa-circle mr-2 text-xs"></i><span>WhatsApp: Disconnected</span>';
+          statusBadge.className =
+            "status-badge px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800 flex items-center";
+          whatsappStatus.textContent = "Disconnected";
+          whatsappStatus.className =
+            "px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full";
+          if (broadcastStatus) {
+            broadcastStatus.textContent = "Disconnected";
+            broadcastStatus.className = "font-medium text-red-600";
+          }
+        }
+      }
+
+      // Check WhatsApp Business API status
+      async function checkWhatsAppStatus() {
+        try {
+          const response = await fetch("/api/whatsapp/status");
+          const data = await response.json();
+          
+          if (data.success) {
+            updateWhatsAppStatus(data.connected);
+            
+            // Update webhook URL
+            const webhookUrl = document.getElementById("webhookUrl");
+            if (webhookUrl && data.webhookUrl) {
+              webhookUrl.textContent = data.webhookUrl;
+            }
+            
+            // Update connection UI
+            if (data.connected && data.config) {
+              document.getElementById("connectionForm").classList.add("hidden");
+              document.getElementById("connectedInfo").classList.remove("hidden");
+              
+              // Update fields with current config
+              document.getElementById("accessToken").value = "••••••••••";
+              document.getElementById("phoneNumberId").value = data.config.phone_number_id || "";
+              document.getElementById("businessAccountId").value = data.config.waba_id || "";
+              document.getElementById("webhookVerifyToken").value = data.config.webhook_verify_token || "satabdi-verify-2025";
+            } else {
+              document.getElementById("connectionForm").classList.remove("hidden");
+              document.getElementById("connectedInfo").classList.add("hidden");
+            }
+          }
+        } catch (error) {
+          console.error("Error checking WhatsApp status:", error);
+        }
+      }
+
+      // Connect WhatsApp Business API
+      async function connectWhatsApp() {
+        const accessToken = document.getElementById("accessToken").value;
+        const phoneNumberId = document.getElementById("phoneNumberId").value;
+        const businessAccountId = document.getElementById("businessAccountId").value;
+        const webhookVerifyToken = document.getElementById("webhookVerifyToken").value;
+
+        if (!accessToken || !phoneNumberId) {
+          showNotification("Access token and phone number ID are required", "error");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/whatsapp/connect", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accessToken,
+              phoneNumberId,
+              businessAccountId,
+              webhookVerifyToken
+            })
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            showNotification("WhatsApp Business API connected successfully!", "success");
+            updateWhatsAppStatus(true);
+            document.getElementById("connectionForm").classList.add("hidden");
+            document.getElementById("connectedInfo").classList.remove("hidden");
+            
+            // Load templates after successful connection
+            await loadWhatsAppTemplates();
+          } else {
+            showNotification("Failed to connect: " + (data.error || data.message), "error");
+          }
+        } catch (error) {
+          showNotification("Error connecting to WhatsApp: " + error.message, "error");
+        }
+      }
+
+      // Disconnect WhatsApp
+      async function disconnectWhatsApp() {
+        try {
+          const response = await fetch("/api/whatsapp/disconnect", {
+            method: "POST"
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            showNotification("WhatsApp disconnected successfully", "info");
+            updateWhatsAppStatus(false);
+            document.getElementById("connectionForm").classList.remove("hidden");
+            document.getElementById("connectedInfo").classList.add("hidden");
+            
+            // Clear sensitive data
+            document.getElementById("accessToken").value = "";
+            document.getElementById("phoneNumberId").value = "";
+            document.getElementById("businessAccountId").value = "";
+          }
+        } catch (error) {
+          showNotification("Error disconnecting WhatsApp: " + error.message, "error");
+        }
+      }
+
+      // Test WhatsApp connection
+      async function testWhatsAppConnection() {
+        try {
+          const response = await fetch("/api/whatsapp/status");
+          const data = await response.json();
+          
+          if (data.success && data.connected) {
+            showNotification("WhatsApp connection test successful!", "success");
+          } else {
+            showNotification("WhatsApp is not connected", "error");
+          }
+        } catch (error) {
+          showNotification("Connection test failed: " + error.message, "error");
+        }
+      }
+
+      // Send test message
+      async function sendTestMessage() {
+        const phoneNumber = document.getElementById("testPhoneNumber").value;
+        const message = document.getElementById("testMessage").value;
+
+        if (!phoneNumber || !message) {
+          showNotification("Phone number and message are required", "error");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/whatsapp/send-test", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phoneNumber, message })
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            showNotification("Test message sent successfully!", "success");
+            document.getElementById("testMessage").value = "";
+          } else {
+            showNotification("Failed to send test message: " + (data.error || data.message), "error");
+          }
+        } catch (error) {
+          showNotification("Error sending test message: " + error.message, "error");
+        }
+      }
+
+      // Load WhatsApp templates
+      async function loadWhatsAppTemplates() {
+        try {
+          const response = await fetch("/api/whatsapp/templates");
+          const data = await response.json();
+          
+          if (data.success) {
+            displayWhatsAppTemplates(data.metaTemplates || []);
+          } else {
+            showNotification("Failed to load templates", "error");
+          }
+        } catch (error) {
+          console.error("Error loading templates:", error);
+          showNotification("Error loading templates: " + error.message, "error");
+        }
+      }
+
+      // Display WhatsApp templates
+      function displayWhatsAppTemplates(templates) {
+        const templatesList = document.getElementById("whatsappTemplatesList");
+        
+        if (!templates || templates.length === 0) {
+          templatesList.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+              <i class="fas fa-layer-group text-gray-300 text-3xl mb-3"></i>
+              <p>No templates found</p>
+              <p class="text-sm">Create your first template or check your WhatsApp Business account</p>
+            </div>
+          `;
+          return;
+        }
+
+        templatesList.innerHTML = templates.map(template => `
+          <div class="bg-gray-50 rounded-lg border border-gray-200 p-4">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <h4 class="font-medium text-gray-800">${template.name}</h4>
+                <div class="flex items-center space-x-2 mt-1">
+                  <span class="text-xs text-gray-500">${template.language} • ${template.category}</span>
+                  <span class="template-status ${template.status.toLowerCase()}">${template.status}</span>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500">
+                ${new Date().toLocaleDateString()}
+              </div>
+            </div>
+            ${template.components ? `
+              <div class="mt-3 text-sm text-gray-600">
+                ${template.components.filter(c => c.type === 'BODY').map(c => 
+                  `<p class="mb-1">${c.text.replace(/\{\{(\d+)\}\}/g, '<span class="bg-yellow-100 px-1 rounded">{$1}</span>')}</p>`
+                ).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      }
+
+      // Show create template modal
+      function showCreateTemplateModal() {
+        document.getElementById("createTemplateModal").classList.remove("hidden");
+      }
+
+      // Close create template modal
+      function closeCreateTemplateModal() {
+        document.getElementById("createTemplateModal").classList.add("hidden");
+      }
+
+      // Create WhatsApp template
+      async function createWhatsAppTemplate() {
+        const name = document.getElementById("templateName").value;
+        const category = document.getElementById("templateCategory").value;
+        const language = document.getElementById("templateLanguage").value;
+        const body = document.getElementById("templateBody").value;
+        const header = document.getElementById("templateHeader").value;
+        const footer = document.getElementById("templateFooter").value;
+
+        if (!name || !category || !language || !body) {
+          showNotification("Template name, category, language and body are required", "error");
+          return;
+        }
+
+        const components = [];
+        
+        // Add header if provided
+        if (header) {
+          components.push({
+            type: "HEADER",
+            format: "TEXT",
+            text: header
+          });
+        }
+        
+        // Add body
+        components.push({
+          type: "BODY",
+          text: body
+        });
+        
+        // Add footer if provided
+        if (footer) {
+          components.push({
+            type: "FOOTER",
+            text: footer
+          });
+        }
+
+        try {
+          const response = await fetch("/api/whatsapp/templates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              category,
+              language,
+              components: JSON.stringify(components)
+            })
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+            showNotification("Template created successfully! It may take some time to appear.", "success");
+            closeCreateTemplateModal();
+            
+            // Clear form
+            document.getElementById("templateName").value = "";
+            document.getElementById("templateBody").value = "";
+            document.getElementById("templateHeader").value = "";
+            document.getElementById("templateFooter").value = "";
+            
+            // Refresh templates list
+            await loadWhatsAppTemplates();
+          } else {
+            showNotification("Failed to create template: " + (data.error || data.message), "error");
+          }
+        } catch (error) {
+          showNotification("Error creating template: " + error.message, "error");
+        }
+      }
+
+      // Copy webhook URL
+      function copyWebhookUrl() {
+        const webhookUrl = document.getElementById("webhookUrl");
+        navigator.clipboard.writeText(webhookUrl.textContent).then(() => {
+          showNotification("Webhook URL copied to clipboard!", "success");
+        });
+      }
+
+      // Load analytics
+      async function loadAnalytics(period = 'today') {
+        try {
+          const response = await fetch("/api/whatsapp/analytics");
+          const data = await response.json();
+          
+          if (data.success) {
+            // Update stats
+            document.getElementById("totalMessages").textContent = data.today.total || 0;
+            document.getElementById("sentMessages").textContent = data.today.sent || 0;
+            document.getElementById("deliveredMessages").textContent = data.today.delivered || 0;
+            document.getElementById("failedMessages").textContent = data.today.failed || 0;
+            
+            // Update message activity
+            const messageActivity = document.getElementById("messageActivity");
+            if (data.weekly && data.weekly.length > 0) {
+              messageActivity.innerHTML = data.weekly.map(day => `
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">${new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}</span>
+                  <div class="flex items-center space-x-4">
+                    <span class="text-sm">${day.total || 0} messages</span>
+                    <span class="text-xs ${day.failed > 0 ? 'text-red-600' : 'text-green-600'}">
+                      ${day.failed > 0 ? `${day.failed} failed` : 'All delivered'}
+                    </span>
+                  </div>
+                </div>
+              `).join('');
+            }
+            
+            // Also update broadcast tab stats
+            updateBroadcastStats(data.today);
+          }
+        } catch (error) {
+          console.error("Error loading analytics:", error);
+        }
+      }
+
+      // Update broadcast stats
+      function updateBroadcastStats(stats) {
+        const messagesToday = document.getElementById("messagesToday");
+        const deliveryRate = document.getElementById("deliveryRate");
+        
+        if (messagesToday && stats.total > 0) {
+          messagesToday.textContent = stats.total;
+        }
+        
+        if (deliveryRate && stats.total > 0) {
+          const rate = Math.round(((stats.sent || 0) / stats.total) * 100);
+          deliveryRate.textContent = `${rate}%`;
+          deliveryRate.className = rate > 90 ? "font-medium text-green-600" : 
+                                  rate > 70 ? "font-medium text-yellow-600" : 
+                                  "font-medium text-red-600";
+        }
+      }
 
       // File upload handling for media messages
       function handleFileSelect(input) {
@@ -1246,14 +1919,6 @@
             const preview = document.getElementById("templatePreview");
             const noPreview = document.getElementById("noPreview");
             const overlay = document.getElementById("barcodeOverlay");
-            const uploadSection = document.getElementById(
-              "template-upload-placeholder"
-            );
-
-            // Hide the upload section since we're using predefined template
-            if (uploadSection) {
-              uploadSection.style.display = "none";
-            }
 
             templateImage = new Image();
             templateImage.onload = function () {
@@ -1277,13 +1942,6 @@
             };
             templateImage.src = url;
 
-            // Hide the template upload container completely
-            const templateUploadContainer = document.querySelector(
-              'label[for="templateImage"]'
-            );
-            if (templateUploadContainer) {
-              templateUploadContainer.style.display = "none";
-            }
           } else {
             console.log("Template preview not available");
           }
@@ -1354,8 +2012,6 @@
       // Update generate button state
       function updateGenerateButtonState() {
         const btn = document.getElementById("generateBarcodeBtn");
-        // Enable button if we have a registration selected
-        // Template is automatically loaded from server
         btn.disabled = !selectedRegistration;
       }
 
@@ -1535,10 +2191,15 @@
         showNotification("Image downloaded successfully!", "success");
       }
 
-      // Send barcode to user via WhatsApp - UPDATED VERSION with duplicate prevention
+      // Send barcode to user via WhatsApp Business API
       async function sendBarcodeToUser() {
         if (!generatedImageData || !selectedRegistration) {
           showNotification("Please generate an image first", "error");
+          return;
+        }
+
+        if (!whatsappConnected) {
+          showNotification("WhatsApp Business API is not connected", "error");
           return;
         }
 
@@ -1563,18 +2224,18 @@
 
           const result = await sendResponse.json();
           if (result.success) {
-            showNotification("Barcode sent to user successfully!", "success");
+            showNotification("Barcode queued for sending successfully!", "success");
 
             // Update button state to prevent duplicate sends
             const sendBtn = document.getElementById("sendBarcodeBtn");
             sendBtn.disabled = true;
             sendBtn.innerHTML =
-              '<i class="fas fa-check mr-2"></i> Already Sent';
+              '<i class="fas fa-check mr-2"></i> Queued for Sending';
             sendBtn.classList.remove("bg-green-600", "hover:bg-green-700");
             sendBtn.classList.add("bg-gray-400", "cursor-not-allowed");
           } else {
             showNotification(
-              "Failed to send barcode: " + result.message,
+              "Failed to queue barcode: " + result.message,
               "error"
             );
           }
@@ -1643,11 +2304,7 @@
             body: JSON.stringify({
               adminNumbers,
               registrationMessage,
-              groups: Array.from(
-                document.querySelectorAll(
-                  '#groups input[type="checkbox"]:checked'
-                )
-              ).map((cb) => cb.value),
+              groups: [] // Groups not supported in WhatsApp Business API
             }),
           });
 
@@ -1662,10 +2319,6 @@
             "error"
           );
         }
-      }
-
-      function updateSelectedGroups() {
-        // Groups are saved when configuration is saved
       }
 
       // Load templates for editing
@@ -1691,18 +2344,26 @@
         const templateOrder = [
           "registration_confirmation",
           "admin_notification",
+          "barcode_message",
+          "change_request"
         ];
 
         const templateNames = {
           registration_confirmation: "Registration Confirmation Template",
           admin_notification: "Admin Notification Template",
+          barcode_message: "Barcode Message Template",
+          change_request: "Change Request Template"
         };
 
         const templateDescriptions = {
           registration_confirmation:
             "This message is automatically sent to users when they register successfully. It confirms their registration and provides details.",
           admin_notification:
-            "This message is automatically sent to admin numbers/groups when new registrations are detected. It provides registration details to admins.",
+            "This message is automatically sent to admin numbers when new registrations are detected. It provides registration details to admins.",
+          barcode_message:
+            "This message is sent to users with their barcode for accommodation facility.",
+          change_request:
+            "This message informs users about how to request changes to their registration details."
         };
 
         // Sort templates according to the defined order
@@ -1807,6 +2468,11 @@
 
         if (!message && !media) {
           showNotification("Message text or media is required", "error");
+          return;
+        }
+
+        if (!whatsappConnected) {
+          showNotification("WhatsApp Business API is not connected", "error");
           return;
         }
 
@@ -1925,6 +2591,11 @@
                 stats.syncStats.pending_messages || 0;
             }
 
+            // Update WhatsApp stats in broadcast tab
+            if (stats.whatsappStats) {
+              updateBroadcastStats(stats.whatsappStats);
+            }
+
             // Update latest registrations
             const latestDiv = document.getElementById("latestRegistrations");
 
@@ -1974,14 +2645,6 @@
         }
       }
 
-      function logoutWhatsApp() {
-        fetch("/api/logout-whatsapp", { method: "POST" })
-          .then((response) => response.json())
-          .then((data) => {
-            showNotification(data.message, data.success ? "info" : "error");
-          });
-      }
-
       // Tab navigation
       function showTab(tabName) {
         // Hide all tabs
@@ -2005,7 +2668,10 @@
           activeNav.classList.add("bg-blue-700", "text-white");
         }
 
-        if (tabName === "templates") {
+        if (tabName === "whatsapp-business") {
+          checkWhatsAppStatus();
+          loadWhatsAppTemplates();
+        } else if (tabName === "templates") {
           loadTemplates();
         } else if (tabName === "barcode-generator") {
           loadRegistrationsForBarcode();
@@ -2029,6 +2695,8 @@
           }
         } else if (tabName === "monitor") {
           getStats(); // Refresh stats when opening monitor tab
+        } else if (tabName === "analytics") {
+          loadAnalytics(); // Load analytics when opening analytics tab
         }
       }
 
@@ -2086,6 +2754,17 @@
 
       // Initialize
       toggleRecipientOptions();
+      
+      // Initialize webhook URL on page load
+      window.addEventListener('load', () => {
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        const webhookUrl = `${protocol}//${host}/webhook/whatsapp`;
+        const webhookElement = document.getElementById('webhookUrl');
+        if (webhookElement) {
+          webhookElement.textContent = webhookUrl;
+        }
+      });
     </script>
   </body>
 </html>
